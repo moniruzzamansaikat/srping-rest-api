@@ -1,11 +1,10 @@
 package saikat.test.restapi.users;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class UserService {
@@ -29,24 +28,28 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public void delete(Integer id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else {
+            throw new UserNotFound();
+        }
+    }
+
     public User update(User user, Integer id) {
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("User not found with ID: " + id);
+            throw new UserNotFound();
         }
-        user = new User(
-                null,
-                user.name(),
-                user.username() != null ? user.username() : null,
-                user.email(),
-                user.dateOfBirth(),
-                user.password(),
-                user.phoneNumber(),
-                user.isEmailVerified(),
-                user.isTwoFactorEnabled(),
-                user.securityQuestion(),
-                user.securityAnswer(),
-                user.lastLogin()
-        );
-        return userRepository.save(user);
+
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFound());
+
+        existingUser.setName(user.getName());
+        existingUser.setUsername(user.getUsername());
+        existingUser.setEmail(user.getEmail());
+        existingUser.setDateOfBirth(user.getDateOfBirth());
+        existingUser.setPhoneNumber(user.getPhoneNumber());
+
+        return userRepository.save(existingUser);
     }
 }

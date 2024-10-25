@@ -1,11 +1,15 @@
 package saikat.test.restapi.users;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,9 +26,11 @@ public class User {
     private String name;
 
     @NotEmpty
+    @Column(unique=true)
     private String username;
 
     @NotEmpty
+    @Column(unique=true)
     @Email
     private String email;
 
@@ -44,11 +50,30 @@ public class User {
 
     private LocalDate lastLogin;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     // Default constructor
-    public User() {
+    public User() {}
+
+    // Pre-persist and pre-update lifecycle hooks
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 
     // Getters and Setters
+    // (Include getters and setters for createdAt and updatedAt as well)
+
     public int getId() {
         return id;
     }
@@ -143,5 +168,13 @@ public class User {
 
     public void setLastLogin(LocalDate lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
