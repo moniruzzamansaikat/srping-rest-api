@@ -1,15 +1,9 @@
 package saikat.test.restapi.users;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
@@ -17,31 +11,31 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/users")
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping({"/", ""})
-    public ArrayList<User> getUsers() {
-        return userRepository.findAll();
+    public List<User> getUsers() {
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public User findOne(@PathVariable Integer id) {
-        Optional<User> optionalUser = userRepository.findOne(id);
-        return optionalUser.orElseThrow(() -> new UserNotFound());
+    public User getUserById(@PathVariable Integer id) {
+        return userService.findOne(id)
+            .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
     }
 
-    @PostMapping({"", "/"})
+    @PostMapping({"", "/"} )
     public User newUser(@Valid @RequestBody User user) {
-        return userRepository.save(user);
+        return userService.save(user);
     }
 
-    @PutMapping({"{id}/update", "/{id}/update"})
-    public User newUser(@PathVariable Integer id, @Valid @RequestBody User user) {
-        return userRepository.update(user, id);
+    @PutMapping("/{id}/update")
+    public User updateUser(@PathVariable Integer id, @Valid @RequestBody User user) {
+        return userService.update(user, id);
     }
 
 }
